@@ -362,19 +362,12 @@ if st.session_state.has_run_matching and st.session_state.matching_results is no
     download_container = st.container()
     with download_container:
         st.subheader("📥 Descargar Resultados")
-        
-        # Create an in-memory Excel file
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            final_df_join_2.to_excel(writer, index=False, sheet_name='Resultados')
-        
-        output.seek(0)
-        
+        csv = final_df_join_2.to_csv(index=False).encode('utf-8')
         st.download_button(
-            label="Descargar Todos los Resultados como Excel",
-            data=output,
-            file_name="resultados_coincidencia_fuzzy.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            label="Descargar Todos los Resultados como CSV",
+            data=csv,
+            file_name="fuzzy_matching_results.csv",
+            mime="text/csv",
             key="download_results"
         )
 

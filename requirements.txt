@@ -1,8 +1,8 @@
-streamlit
-pandas
-fuzzywuzzy
-python-Levenshtein
-plotly
-unicodedata2
-xlsxwriter
-openpyxl
+streamlit>=1.22.0
+pandas>=1.5.0
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.20.9
+plotly>=5.13.0
+openpyxl>=3.1.0
+xlrd>=2.0.1
+pyarrow>=14.0.1
