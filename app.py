@@ -195,6 +195,11 @@ if run_matching:
             
             keep_cols = [proveedor, sku_columna]
             
+            # Explicitly convert problematic columns to string type to avoid Arrow/Streamlit conversion issues
+            for col in keep_cols:
+                if col in df0_dismac.columns:
+                    df0_dismac[col] = df0_dismac[col].astype(str)
+            
             df_dismac = df0_dismac[keep_cols].copy()
             df_dismac.loc[:, proveedor] = df_dismac[proveedor].astype(str).str.lower().str.strip()
             df_dismac.loc[:, 'codigo_proveedor_clean'] = df_dismac[sku_columna].astype(str).str.lower().str.strip()
@@ -302,6 +307,11 @@ if run_matching:
                     how='right'
                 )
                 
+                # Ensure all columns are string type to avoid PyArrow conversion issues
+                for col in final_df_join_2.columns:
+                    if col != 'match_type':  # Keep match_type as is for filtering
+                        final_df_join_2[col] = final_df_join_2[col].astype(str)
+                
                 # Display summary chart
                 if not final_df_join_2.empty:
                     match_fig = create_match_summary_chart(final_df_join_2)
@@ -330,26 +340,36 @@ if run_matching:
                 
                 tabs = st.tabs(["All Results", "Perfect Matches", "Fuzzy Matches", "No Matches"])
                 
+                # Function to safely display dataframes
+                def safe_display_dataframe(df):
+                    # Create a copy to avoid modifying the original
+                    display_df = df.copy()
+                    # Ensure all columns are strings for display (except match_type)
+                    for col in display_df.columns:
+                        if col != 'match_type':
+                            display_df[col] = display_df[col].astype(str)
+                    st.dataframe(display_df, use_container_width=True)
+                
                 with tabs[0]:
-                    st.dataframe(final_df_join_2, use_container_width=True)
+                    safe_display_dataframe(final_df_join_2)
                 
                 with tabs[1]:
                     perfect_matches = final_df_join_2[final_df_join_2['match_type'] == 'perfect']
                     if not perfect_matches.empty:
-                        st.dataframe(perfect_matches, use_container_width=True)
+                        safe_display_dataframe(perfect_matches)
                     else:
                         st.info("No perfect matches found")
                 
                 with tabs[2]:
                     if not fuzzy_matches.empty:
-                        st.dataframe(fuzzy_matches, use_container_width=True)
+                        safe_display_dataframe(fuzzy_matches)
                     else:
                         st.info("No fuzzy matches found")
                 
                 with tabs[3]:
                     no_matches = final_df_join_2[final_df_join_2['match_type'] == 'no match']
                     if not no_matches.empty:
-                        st.dataframe(no_matches, use_container_width=True)
+                        safe_display_dataframe(no_matches)
                     else:
                         st.info("No unmatched SKUs found")
                 
