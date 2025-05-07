@@ -233,7 +233,6 @@ if run_matching:
             st.stop()  # Stop execution until user decides
         
         # We'll only reach here if there are no duplicates or user has clicked proceed
-        st.header("🎯 Matching Results")
         
         with st.spinner("Performing fuzzy matching..."):
             
@@ -260,27 +259,7 @@ if run_matching:
                 # Convert unmatched keys to original format
                 unmatched_keys_original = [df_seller_sku_clean_to_original_lookup.get(x, x) for x in unmatched_keys]
                 
-                # Display unmatched keys
-                st.subheader("🔍 Unmatched SKUs")
-                if unmatched_keys_original:
-                    st.write(f"SKUs in Seller Excel without a match: {len(unmatched_keys_original)}")
-                    
-                    # Display as a table for better readability
-                    unmatched_df = pd.DataFrame({
-                        "Unmatched SKU": unmatched_keys_original
-                    })
-                    st.dataframe(unmatched_df)
-                    
-                    # Provide download option for unmatched SKUs
-                    unmatched_csv = unmatched_df.to_csv(index=False)
-                    st.download_button(
-                        label="Download Unmatched SKUs as CSV",
-                        data=unmatched_csv,
-                        file_name="unmatched_skus.csv",
-                        mime="text/csv"
-                    )
-                else:
-                    st.success("✅ All SKUs were matched!")
+                # Skip displaying unmatched keys section
                 
                 # Merge output with dismac data
                 final_df_join = pd.merge(
@@ -308,28 +287,7 @@ if run_matching:
                     if col != 'match_type':  # Keep match_type as is for filtering
                         final_df_join_2[col] = final_df_join_2[col].astype(str)
                 
-                # Display summary chart
-                if not final_df_join_2.empty:
-                    match_fig = create_match_summary_chart(final_df_join_2)
-                    st.plotly_chart(match_fig, use_container_width=True)
-                
-                # Display fuzzy matches
-                st.subheader("🔄 Fuzzy Matched SKUs")
-                fuzzy_matches = final_df_join_2[final_df_join_2['match_type'] == 'aprox'][[seller_sku_columna.lower(), 'match_valor', 'match_type']]
-                
-                if not fuzzy_matches.empty:
-                    st.dataframe(fuzzy_matches)
-                    
-                    # Provide download option for fuzzy matches
-                    fuzzy_csv = fuzzy_matches.to_csv(index=False)
-                    st.download_button(
-                        label="Download Fuzzy Matches as CSV",
-                        data=fuzzy_csv,
-                        file_name="fuzzy_matches.csv",
-                        mime="text/csv"
-                    )
-                else:
-                    st.info("No fuzzy matches found. All matches were either perfect or no match.")
+                # Skip displaying match type distribution chart and fuzzy matches
                 
                 # Display all results with tabs
                 st.subheader("📊 All Results")
