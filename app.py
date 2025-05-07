@@ -256,7 +256,7 @@ Esta aplicación busca coincidencias entre el SKU del Seller y Dismac Marketplac
 st.sidebar.title("⚙️ Parámetros")
 seller_sku_columna = st.sidebar.text_input("Nombre de Columna SKU del Vendedor", "", placeholder="Ingresa el nombre de la columna SKU del vendedor")
 target_proveedor = st.sidebar.text_input("Proveedor Objetivo", "", placeholder="Ingresa el proveedor objetivo")
-threshold = st.sidebar.slider("Umbral de Coincidencia Aproximada", 0, 100, 70, 
+threshold = st.sidebar.slider("Umbral de Coincidencia Aproximada", 0, 100, 95, 
                             help="Puntuación mínima (0-100) para considerar una coincidencia aproximada")
 
 # File uploads
