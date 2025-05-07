@@ -231,9 +231,11 @@ if run_matching:
             st.warning("⚠️ Duplicated SKUs found in the Excel files. This may affect matching results.")
             st.button("Proceed with duplicates anyway", on_click=proceed_anyway, key="proceed_button")
             st.stop()  # Stop execution until user decides
-            
+        
         # We'll only reach here if there are no duplicates or user has clicked proceed
         st.header("🎯 Matching Results")
+        
+        with st.spinner("Performing fuzzy matching..."):
             
             with st.spinner("Performing fuzzy matching..."):
                 # Filter dismac data for target proveedor
