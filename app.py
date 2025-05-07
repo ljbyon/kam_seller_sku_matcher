@@ -255,7 +255,8 @@ Upload your files, set parameters, and get matching results.
 
 # Sidebar for parameters
 st.sidebar.title("⚙️ Parameters")
-seller_sku_columna = st.sidebar.text_input("Seller SKU Column Name", "SKU")
+seller_sku_columna = st.sidebar.text_input("Seller SKU Column Name", "", placeholder="Enter seller SKU column name")
+target_proveedor = st.sidebar.text_input("Target Proveedor", "", placeholder="Enter target proveedor")
 target_proveedor = st.sidebar.text_input("Target Proveedor", "Triplex")
 threshold = st.sidebar.slider("Fuzzy Match Threshold", 0, 100, 70, 
                             help="Minimum score (0-100) to consider a fuzzy match")
