@@ -4,14 +4,32 @@ import unicodedata
 from fuzzywuzzy import process
 import io
 import plotly.graph_objects as go
+import base64
 
 # Initialize session state
 if 'proceed_with_duplicates' not in st.session_state:
     st.session_state.proceed_with_duplicates = False
+if 'has_results' not in st.session_state:
+    st.session_state.has_results = False
+if 'final_results' not in st.session_state:
+    st.session_state.final_results = None
+if 'perfect_matches' not in st.session_state:
+    st.session_state.perfect_matches = None
+if 'fuzzy_matches' not in st.session_state:
+    st.session_state.fuzzy_matches = None
+if 'no_matches' not in st.session_state:
+    st.session_state.no_matches = None
 
 # Function to handle the "proceed anyway" button click
 def proceed_anyway():
     st.session_state.proceed_with_duplicates = True
+    
+# Function to create a download link that doesn't cause rerun
+def get_csv_download_link(df, filename="data.csv"):
+    csv = df.to_csv(index=False)
+    b64 = base64.b64encode(csv.encode()).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="{filename}">Download {filename}</a>'
+    return href
 
 # Set page config
 st.set_page_config(page_title="Excel Fuzzy Matcher", layout="wide")
@@ -290,78 +308,79 @@ if run_matching:
                 # Define fuzzy_matches here for use in tabs later
                 fuzzy_matches = final_df_join_2[final_df_join_2['match_type'] == 'aprox'][[seller_sku_columna.lower(), 'match_valor', 'match_type']]
                 
-                # Summary statistics
-                st.subheader("📈 Summary Statistics")
-                
-                total_skus = len(final_df_join_2)
-                perfect_matches_count = len(final_df_join_2[final_df_join_2['match_type'] == 'perfect'])
-                fuzzy_matches_count = len(final_df_join_2[final_df_join_2['match_type'] == 'aprox'])
-                no_matches_count = len(final_df_join_2[final_df_join_2['match_type'] == 'no match'])
-                
-                col1, col2, col3, col4 = st.columns(4)
-                
-                with col1:
-                    st.metric("Total SKUs", total_skus)
-                
-                with col2:
-                    st.metric("Perfect Matches", perfect_matches_count, 
-                             f"{perfect_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
-                
-                with col3:
-                    st.metric("Fuzzy Matches", fuzzy_matches_count,
-                             f"{fuzzy_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
-                
-                with col4:
-                    st.metric("No Matches", no_matches_count,
-                             f"{no_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
-                
-                # Display all results with tabs
-                st.subheader("📊 All Results")
-                
-                tabs = st.tabs(["All Results", "Perfect Matches", "Fuzzy Matches", "No Matches"])
-                
-                # Function to safely display dataframes
-                def safe_display_dataframe(df):
-                    # Create a copy to avoid modifying the original
-                    display_df = df.copy()
-                    # Ensure all columns are strings for display (except match_type)
-                    for col in display_df.columns:
-                        if col != 'match_type':
-                            display_df[col] = display_df[col].astype(str)
-                    st.dataframe(display_df, use_container_width=True)
-                
-                with tabs[0]:
-                    safe_display_dataframe(final_df_join_2)
-                
-                with tabs[1]:
-                    perfect_matches = final_df_join_2[final_df_join_2['match_type'] == 'perfect']
-                    if not perfect_matches.empty:
-                        safe_display_dataframe(perfect_matches)
-                    else:
-                        st.info("No perfect matches found")
-                
-                with tabs[2]:
-                    if not fuzzy_matches.empty:
-                        safe_display_dataframe(fuzzy_matches)
-                    else:
-                        st.info("No fuzzy matches found")
-                
-                with tabs[3]:
-                    no_matches = final_df_join_2[final_df_join_2['match_type'] == 'no match']
-                    if not no_matches.empty:
-                        safe_display_dataframe(no_matches)
-                    else:
-                        st.info("No unmatched SKUs found")
-                
-                # Provide download link for all results
-                st.subheader("📥 Download Results")
-                csv = final_df_join_2.to_csv(index=False)
-                st.download_button(
-                    label="Download All Results as CSV",
-                    data=csv,
-                    file_name="fuzzy_matching_results.csv",
-                    mime="text/csv"
-                )
+                # Summary statistics - check if we have results in session state
+                if st.session_state.has_results:
+                    # Get data from session state
+                    final_df_join_2 = st.session_state.final_results
+                    perfect_matches = st.session_state.perfect_matches
+                    fuzzy_matches = st.session_state.fuzzy_matches
+                    no_matches = st.session_state.no_matches
+                    
+                    st.subheader("📈 Summary Statistics")
+                    
+                    total_skus = len(final_df_join_2)
+                    perfect_matches_count = len(perfect_matches)
+                    fuzzy_matches_count = len(fuzzy_matches)
+                    no_matches_count = len(no_matches)
+                    
+                    col1, col2, col3, col4 = st.columns(4)
+                    
+                    with col1:
+                        st.metric("Total SKUs", total_skus)
+                    
+                    with col2:
+                        st.metric("Perfect Matches", perfect_matches_count, 
+                                 f"{perfect_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
+                    
+                    with col3:
+                        st.metric("Fuzzy Matches", fuzzy_matches_count,
+                                 f"{fuzzy_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
+                    
+                    with col4:
+                        st.metric("No Matches", no_matches_count,
+                                 f"{no_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
+                    
+                    # Display all results with tabs
+                    st.subheader("📊 All Results")
+                    
+                    tabs = st.tabs(["All Results", "Perfect Matches", "Fuzzy Matches", "No Matches"])
+                    
+                    # Function to safely display dataframes
+                    def safe_display_dataframe(df):
+                        # Create a copy to avoid modifying the original
+                        display_df = df.copy()
+                        # Ensure all columns are strings for display (except match_type)
+                        for col in display_df.columns:
+                            if col != 'match_type':
+                                display_df[col] = display_df[col].astype(str)
+                        st.dataframe(display_df, use_container_width=True)
+                    
+                    with tabs[0]:
+                        safe_display_dataframe(final_df_join_2)
+                    
+                    with tabs[1]:
+                        if not perfect_matches.empty:
+                            safe_display_dataframe(perfect_matches)
+                        else:
+                            st.info("No perfect matches found")
+                    
+                    with tabs[2]:
+                        if not fuzzy_matches.empty:
+                            safe_display_dataframe(fuzzy_matches)
+                        else:
+                            st.info("No fuzzy matches found")
+                    
+                    with tabs[3]:
+                        if not no_matches.empty:
+                            safe_display_dataframe(no_matches)
+                        else:
+                            st.info("No unmatched SKUs found")
+                    
+                    # Provide download link for all results
+                    st.subheader("📥 Download Results")
+                    
+                    # Use HTML for download to avoid page rerun
+                    st.markdown(get_csv_download_link(final_df_join_2, "fuzzy_matching_results.csv"), unsafe_allow_html=True)
                 
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
