@@ -6,7 +6,7 @@ import io
 import plotly.graph_objects as go
 
 # Set page config
-st.set_page_config(page_title="Excel Fuzzy Matcher", layout="wide")
+st.set_page_config(page_title="Comparador Fuzzy de Excel", layout="wide")
 
 # Initialize session state
 if 'proceed_with_duplicates' not in st.session_state:
@@ -56,7 +56,7 @@ def fuzzy_left_join(df1, df2, key1, key2, threshold=70):
     
     # Track match type for each df2 key
     for i, sku2 in enumerate(df2_keys):
-        status_text.text(f"Processing item {i+1}/{len(df2_keys)}")
+        status_text.text(f"Procesando elemento {i+1}/{len(df2_keys)}")
         progress_bar.progress((i + 1) / len(df2_keys))
         
         # First try exact matching
@@ -96,7 +96,7 @@ def proceed_anyway():
 def process_and_match(seller_file, dismac_file, seller_sku_columna, target_proveedor, threshold):
     try:
         # Process seller file
-        with st.spinner("Processing Seller Excel..."):
+        with st.spinner("Procesando Excel del Vendedor..."):
             df0_seller = pd.read_excel(seller_file)
             
             # Clean column names
@@ -105,7 +105,7 @@ def process_and_match(seller_file, dismac_file, seller_sku_columna, target_prove
             
             # Ensure the specified column exists
             if seller_sku_columna.lower() not in df0_seller.columns:
-                st.error(f"Column '{seller_sku_columna}' not found in seller Excel. Available columns: {', '.join(df0_seller.columns)}")
+                st.error(f"Columna '{seller_sku_columna}' no encontrada en el Excel del vendedor. Columnas disponibles: {', '.join(df0_seller.columns)}")
                 return None
             
             keep_cols = [seller_sku_columna.lower()]
@@ -118,15 +118,15 @@ def process_and_match(seller_file, dismac_file, seller_sku_columna, target_prove
             # Check for duplicates
             duplicated_mask_seller = df_seller['sku_clean'].duplicated()
             if duplicated_mask_seller.any():
-                st.error("⚠️ Duplicated SKUs found in Seller Excel:")
+                st.error("⚠️ SKUs duplicados encontrados en el Excel del Vendedor:")
                 st.dataframe(df0_seller[duplicated_mask_seller.values][[seller_sku_columna.lower()]].drop_duplicates())
                 has_seller_duplicates = True
             else:
-                st.success("✅ No duplicated SKUs found in Seller Excel")
+                st.success("✅ No se encontraron SKUs duplicados en el Excel del Vendedor")
                 has_seller_duplicates = False
         
         # Process dismac file
-        with st.spinner("Processing Dismac Excel..."):
+        with st.spinner("Procesando Excel de Dismac..."):
             df0_dismac = pd.read_excel(dismac_file)
             
             # Clean column names
@@ -139,7 +139,7 @@ def process_and_match(seller_file, dismac_file, seller_sku_columna, target_prove
             # Ensure the required columns exist
             missing_cols = [col for col in [proveedor, sku_columna] if col not in df0_dismac.columns]
             if missing_cols:
-                st.error(f"Columns {', '.join(missing_cols)} not found in Dismac Excel. Available columns: {', '.join(df0_dismac.columns)}")
+                st.error(f"Columnas {', '.join(missing_cols)} no encontradas en el Excel de Dismac. Columnas disponibles: {', '.join(df0_dismac.columns)}")
                 return None
             
             keep_cols = [proveedor, sku_columna]
@@ -161,11 +161,11 @@ def process_and_match(seller_file, dismac_file, seller_sku_columna, target_prove
             # Check for duplicates
             duplicated_mask_dismac = df_valid['codigo_proveedor_clean'].duplicated()
             if duplicated_mask_dismac.any():
-                st.error("⚠️ Duplicated SKUs found in Dismac Excel:")
+                st.error("⚠️ SKUs duplicados encontrados en el Excel de Dismac:")
                 st.dataframe(df0_valid[duplicated_mask_dismac.values][keep_cols].drop_duplicates())
                 has_dismac_duplicates = True
             else:
-                st.success("✅ No duplicated SKUs found in Dismac Excel")
+                st.success("✅ No se encontraron SKUs duplicados en el Excel de Dismac")
                 has_dismac_duplicates = False
         
         # Check if we should proceed (no duplicates or user confirmed)
@@ -173,18 +173,18 @@ def process_and_match(seller_file, dismac_file, seller_sku_columna, target_prove
         
         # If there are duplicates and user hasn't clicked the proceed button yet
         if has_duplicates and not st.session_state.proceed_with_duplicates:
-            st.warning("⚠️ Duplicated SKUs found in the Excel files. This may affect matching results.")
-            st.button("Proceed with duplicates anyway", on_click=proceed_anyway, key="proceed_button")
+            st.warning("⚠️ Se encontraron SKUs duplicados en los archivos Excel. Esto puede afectar los resultados de la comparación.")
+            st.button("Continuar con duplicados de todos modos", on_click=proceed_anyway, key="proceed_button")
             return None
             
         # Perform fuzzy matching
-        with st.spinner("Performing fuzzy matching..."):
+        with st.spinner("Realizando coincidencia aproximada..."):
             # Filter dismac data for target proveedor
             df_dismac_subset = df_dismac[df_dismac[proveedor] == target_proveedor.lower()]
             
             if df_dismac_subset.shape[0] == 0:
                 available_proveedores = df_dismac[proveedor].unique().tolist()
-                st.error(f"No records found for proveedor '{target_proveedor}'. Available proveedores: {', '.join(available_proveedores)}")
+                st.error(f"No se encontraron registros para el proveedor '{target_proveedor}'. Proveedores disponibles: {', '.join(available_proveedores)}")
                 return None
             
             # Perform fuzzy matching
@@ -242,43 +242,43 @@ def process_and_match(seller_file, dismac_file, seller_sku_columna, target_prove
             }
             
     except Exception as e:
-        st.error(f"An error occurred: {str(e)}")
+        st.error(f"Ocurrió un error: {str(e)}")
         st.exception(e)
         return None
 
 # App title
-st.title("🔍 Excel Fuzzy Matcher")
+st.title("🔍 Comparador Fuzzy de Excel")
 st.markdown("""
-This app matches SKUs between two Excel files using fuzzy matching.
-Upload your files, set parameters, and get matching results.
+Esta aplicación compara SKUs entre dos archivos Excel utilizando coincidencia aproximada.
+Sube tus archivos, configura los parámetros y obtén resultados de coincidencia.
 """)
 
 # Sidebar for parameters
-st.sidebar.title("⚙️ Parameters")
-seller_sku_columna = st.sidebar.text_input("Seller SKU Column Name", "", placeholder="Enter seller SKU column name")
-target_proveedor = st.sidebar.text_input("Target Proveedor", "", placeholder="Enter target proveedor")
-target_proveedor = st.sidebar.text_input("Target Proveedor", "Triplex")
-threshold = st.sidebar.slider("Fuzzy Match Threshold", 0, 100, 70, 
-                            help="Minimum score (0-100) to consider a fuzzy match")
+st.sidebar.title("⚙️ Parámetros")
+seller_sku_columna = st.sidebar.text_input("Nombre de Columna SKU del Vendedor", "", placeholder="Ingresa el nombre de la columna SKU del vendedor")
+target_proveedor = st.sidebar.text_input("Proveedor Objetivo", "", placeholder="Ingresa el proveedor objetivo")
+target_proveedor = st.sidebar.text_input("Proveedor Objetivo", "Triplex")
+threshold = st.sidebar.slider("Umbral de Coincidencia Aproximada", 0, 100, 70, 
+                            help="Puntuación mínima (0-100) para considerar una coincidencia aproximada")
 
 # File uploads
-st.header("📁 Upload Files")
+st.header("📁 Subir Archivos")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("Seller Excel File")
-    seller_file = st.file_uploader("Upload Seller Excel file", type=["xlsx", "xls"])
+    st.subheader("Archivo Excel del Vendedor")
+    seller_file = st.file_uploader("Subir archivo Excel del Vendedor", type=["xlsx", "xls"])
     if seller_file:
-        st.success(f"Uploaded: {seller_file.name}")
+        st.success(f"Subido: {seller_file.name}")
 
 with col2:
-    st.subheader("Dismac Excel File")
-    dismac_file = st.file_uploader("Upload Dismac Excel file", type=["xlsx", "xls"])
+    st.subheader("Archivo Excel de Dismac")
+    dismac_file = st.file_uploader("Subir archivo Excel de Dismac", type=["xlsx", "xls"])
     if dismac_file:
-        st.success(f"Uploaded: {dismac_file.name}")
+        st.success(f"Subido: {dismac_file.name}")
 
 # Run button
-run_matching = st.button("🚀 Run Matching", 
+run_matching = st.button("🚀 Ejecutar Comparación", 
                         disabled=(seller_file is None or dismac_file is None))
 
 # Process files when button is clicked
@@ -299,7 +299,7 @@ if st.session_state.has_run_matching and st.session_state.matching_results is no
     no_matches = final_df_join_2[final_df_join_2['match_type'] == 'no match']
     
     # Summary statistics
-    st.subheader("📈 Summary Statistics")
+    st.subheader("📈 Estadísticas Resumidas")
     
     total_skus = len(final_df_join_2)
     perfect_matches_count = len(perfect_matches)
@@ -309,24 +309,24 @@ if st.session_state.has_run_matching and st.session_state.matching_results is no
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("Total SKUs", total_skus)
+        st.metric("Total de SKUs", total_skus)
     
     with col2:
-        st.metric("Perfect Matches", perfect_matches_count, 
+        st.metric("Coincidencias Perfectas", perfect_matches_count, 
                  f"{perfect_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
     
     with col3:
-        st.metric("Fuzzy Matches", fuzzy_matches_count,
+        st.metric("Coincidencias Aproximadas", fuzzy_matches_count,
                  f"{fuzzy_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
     
     with col4:
-        st.metric("No Matches", no_matches_count,
+        st.metric("Sin Coincidencias", no_matches_count,
                  f"{no_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
     
     # Display all results with tabs
-    st.subheader("📊 All Results")
+    st.subheader("📊 Todos los Resultados")
     
-    tabs = st.tabs(["All Results", "Perfect Matches", "Fuzzy Matches", "No Matches"])
+    tabs = st.tabs(["Todos los Resultados", "Coincidencias Perfectas", "Coincidencias Aproximadas", "Sin Coincidencias"])
     
     # Function to safely display dataframes
     def safe_display_dataframe(df):
@@ -345,27 +345,27 @@ if st.session_state.has_run_matching and st.session_state.matching_results is no
         if not perfect_matches.empty:
             safe_display_dataframe(perfect_matches)
         else:
-            st.info("No perfect matches found")
+            st.info("No se encontraron coincidencias perfectas")
     
     with tabs[2]:
         if not fuzzy_matches.empty:
             safe_display_dataframe(fuzzy_matches)
         else:
-            st.info("No fuzzy matches found")
+            st.info("No se encontraron coincidencias aproximadas")
     
     with tabs[3]:
         if not no_matches.empty:
             safe_display_dataframe(no_matches)
         else:
-            st.info("No unmatched SKUs found")
+            st.info("No se encontraron SKUs sin coincidencia")
     
     # Provide download link for all results - using a container to avoid rerun issues
     download_container = st.container()
     with download_container:
-        st.subheader("📥 Download Results")
+        st.subheader("📥 Descargar Resultados")
         csv = final_df_join_2.to_csv(index=False).encode('utf-8')
         st.download_button(
-            label="Download All Results as CSV",
+            label="Descargar Todos los Resultados como CSV",
             data=csv,
             file_name="fuzzy_matching_results.csv",
             mime="text/csv",
@@ -375,9 +375,9 @@ if st.session_state.has_run_matching and st.session_state.matching_results is no
 # App info in sidebar
 st.sidebar.markdown("---")
 st.sidebar.info("""
-## 📖 How to Use
-1. Upload the Seller and Dismac Excel files
-2. Set the Seller SKU column name and target proveedor
-3. Adjust the fuzzy match threshold if needed
-4. Click "Run Matching" to see the results
+## 📖 Cómo Usar
+1. Sube los archivos Excel del Vendedor y Dismac
+2. Configura el nombre de la columna SKU del vendedor y el proveedor objetivo
+3. Ajusta el umbral de coincidencia aproximada si es necesario
+4. Haz clic en "Ejecutar Comparación" para ver los resultados
 """)
