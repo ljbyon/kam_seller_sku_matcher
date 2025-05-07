@@ -5,6 +5,10 @@ from fuzzywuzzy import process
 import io
 import plotly.graph_objects as go
 
+# Initialize session state
+if 'duplicates_confirmed' not in st.session_state:
+    st.session_state.duplicates_confirmed = False
+
 # Set page config
 st.set_page_config(page_title="Excel Fuzzy Matcher", layout="wide")
 
@@ -210,11 +214,24 @@ if run_matching:
                 st.success("✅ No duplicated SKUs found in Dismac Excel")
                 has_dismac_duplicates = False
         
-        # Only proceed if there are no duplicates or user confirms
+        # Initialize session state for duplicates confirmation if not already set
+        if 'duplicates_confirmed' not in st.session_state:
+            st.session_state.duplicates_confirmed = False
+        
+        # Check if we should proceed (no duplicates or user confirmed)
         proceed = not (has_seller_duplicates or has_dismac_duplicates)
         
+        # If there are duplicates, show checkbox and update session state
         if not proceed:
-            proceed = st.checkbox("I understand there are duplicates but want to proceed anyway")
+            duplicates_confirmed = st.checkbox(
+                "I understand there are duplicates but want to proceed anyway",
+                value=st.session_state.duplicates_confirmed,
+                key="confirm_duplicates"
+            )
+            
+            # Update session state when checkbox changes
+            st.session_state.duplicates_confirmed = duplicates_confirmed
+            proceed = duplicates_confirmed
         
         if proceed:
             st.header("🎯 Matching Results")
