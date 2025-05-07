@@ -245,8 +245,6 @@ if run_matching:
                     st.error(f"No records found for proveedor '{target_proveedor}'. Available proveedores: {', '.join(available_proveedores)}")
                     st.stop()
                 
-                st.info(f"Found {df_dismac_subset.shape[0]} records for proveedor '{target_proveedor}'")
-                
                 # Perform fuzzy matching
                 final_df, unmatched_keys = fuzzy_left_join(
                     df1=df_dismac_subset,
