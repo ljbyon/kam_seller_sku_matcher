@@ -6,7 +6,7 @@ import io
 import plotly.graph_objects as go
 
 # Set page config
-st.set_page_config(page_title="Comparador Fuzzy de Excel", layout="wide")
+st.set_page_config(page_title="Marketplace SKU Matcher", layout="wide")
 
 # Initialize session state
 if 'proceed_with_duplicates' not in st.session_state:
@@ -174,7 +174,7 @@ def process_and_match(seller_file, dismac_file, seller_sku_columna, target_prove
         # If there are duplicates and user hasn't clicked the proceed button yet
         if has_duplicates and not st.session_state.proceed_with_duplicates:
             st.warning("⚠️ Se encontraron SKUs duplicados en los archivos Excel. Esto puede afectar los resultados de la comparación.")
-            st.button("Continuar con duplicados de todos modos", on_click=proceed_anyway, key="proceed_button")
+            st.button("Estoy apurad@. Continuar con duplicados de todos modos", on_click=proceed_anyway, key="proceed_button")
             return None
             
         # Perform fuzzy matching
@@ -247,10 +247,9 @@ def process_and_match(seller_file, dismac_file, seller_sku_columna, target_prove
         return None
 
 # App title
-st.title("🔍 Comparador Fuzzy de Excel")
+st.title("Marketplace SKU Matcher")
 st.markdown("""
-Esta aplicación compara SKUs entre dos archivos Excel utilizando coincidencia aproximada.
-Sube tus archivos, configura los parámetros y obtén resultados de coincidencia.
+Esta aplicación busca coincidencias entre el SKU del Seller y Dismac Marketplace
 """)
 
 # Sidebar for parameters
@@ -261,7 +260,7 @@ threshold = st.sidebar.slider("Umbral de Coincidencia Aproximada", 0, 100, 70,
                             help="Puntuación mínima (0-100) para considerar una coincidencia aproximada")
 
 # File uploads
-st.header("📁 Subir Archivos")
+
 col1, col2 = st.columns(2)
 
 with col1:
