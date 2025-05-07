@@ -220,6 +220,16 @@ def process_and_match(seller_file, dismac_file, seller_sku_columna, target_prove
                 how='right'
             )
             
+            # Fill null values in match_type with 'no match'
+            final_df_join_2['match_type'] = final_df_join_2['match_type'].fillna('no match')
+            
+            # Assert that total SKUs equals sum of match types
+            assert len(final_df_join_2) == (
+                len(final_df_join_2[final_df_join_2['match_type'] == 'perfect']) +
+                len(final_df_join_2[final_df_join_2['match_type'] == 'aprox']) +
+                len(final_df_join_2[final_df_join_2['match_type'] == 'no match'])
+            ), "Total SKUs doesn't equal sum of match types"
+            
             # Ensure all columns are string type to avoid PyArrow conversion issues
             for col in final_df_join_2.columns:
                 if col != 'match_type':  # Keep match_type as is for filtering
