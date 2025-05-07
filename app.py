@@ -292,6 +292,31 @@ if run_matching:
                 # Define fuzzy_matches here for use in tabs later
                 fuzzy_matches = final_df_join_2[final_df_join_2['match_type'] == 'aprox'][[seller_sku_columna.lower(), 'match_valor', 'match_type']]
                 
+                # Summary statistics
+                st.subheader("📈 Summary Statistics")
+                
+                total_skus = len(final_df_join_2)
+                perfect_matches_count = len(final_df_join_2[final_df_join_2['match_type'] == 'perfect'])
+                fuzzy_matches_count = len(final_df_join_2[final_df_join_2['match_type'] == 'aprox'])
+                no_matches_count = len(final_df_join_2[final_df_join_2['match_type'] == 'no match'])
+                
+                col1, col2, col3, col4 = st.columns(4)
+                
+                with col1:
+                    st.metric("Total SKUs", total_skus)
+                
+                with col2:
+                    st.metric("Perfect Matches", perfect_matches_count, 
+                             f"{perfect_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
+                
+                with col3:
+                    st.metric("Fuzzy Matches", fuzzy_matches_count,
+                             f"{fuzzy_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
+                
+                with col4:
+                    st.metric("No Matches", no_matches_count,
+                             f"{no_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
+                
                 # Display all results with tabs
                 st.subheader("📊 All Results")
                 
@@ -339,31 +364,6 @@ if run_matching:
                     file_name="fuzzy_matching_results.csv",
                     mime="text/csv"
                 )
-                
-                # Summary statistics
-                st.subheader("📈 Summary Statistics")
-                
-                total_skus = len(final_df_join_2)
-                perfect_matches_count = len(final_df_join_2[final_df_join_2['match_type'] == 'perfect'])
-                fuzzy_matches_count = len(final_df_join_2[final_df_join_2['match_type'] == 'aprox'])
-                no_matches_count = len(final_df_join_2[final_df_join_2['match_type'] == 'no match'])
-                
-                col1, col2, col3, col4 = st.columns(4)
-                
-                with col1:
-                    st.metric("Total SKUs", total_skus)
-                
-                with col2:
-                    st.metric("Perfect Matches", perfect_matches_count, 
-                             f"{perfect_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
-                
-                with col3:
-                    st.metric("Fuzzy Matches", fuzzy_matches_count,
-                             f"{fuzzy_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
-                
-                with col4:
-                    st.metric("No Matches", no_matches_count,
-                             f"{no_matches_count/total_skus*100:.1f}%" if total_skus > 0 else "0%")
                 
     except Exception as e:
         st.error(f"An error occurred: {str(e)}")
