@@ -257,7 +257,6 @@ Sube tus archivos, configura los parámetros y obtén resultados de coincidencia
 st.sidebar.title("⚙️ Parámetros")
 seller_sku_columna = st.sidebar.text_input("Nombre de Columna SKU del Vendedor", "", placeholder="Ingresa el nombre de la columna SKU del vendedor")
 target_proveedor = st.sidebar.text_input("Proveedor Objetivo", "", placeholder="Ingresa el proveedor objetivo")
-target_proveedor = st.sidebar.text_input("Proveedor Objetivo", "Triplex")
 threshold = st.sidebar.slider("Umbral de Coincidencia Aproximada", 0, 100, 70, 
                             help="Puntuación mínima (0-100) para considerar una coincidencia aproximada")
 
