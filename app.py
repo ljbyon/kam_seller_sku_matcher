@@ -289,6 +289,9 @@ if run_matching:
                 
                 # Skip displaying match type distribution chart and fuzzy matches
                 
+                # Define fuzzy_matches here for use in tabs later
+                fuzzy_matches = final_df_join_2[final_df_join_2['match_type'] == 'aprox'][[seller_sku_columna.lower(), 'match_valor', 'match_type']]
+                
                 # Display all results with tabs
                 st.subheader("📊 All Results")
                 
